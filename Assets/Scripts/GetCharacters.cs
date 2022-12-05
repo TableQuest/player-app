@@ -7,6 +7,7 @@ using TMPro;
 using SocketIOClient;
 using UnityEditor.PackageManager;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GetCharacters : MonoBehaviour
 {
@@ -18,10 +19,12 @@ public class GetCharacters : MonoBehaviour
     GameObject clientObject;
     SocketIO client;
 
+    GameObject playerObject;
 
     void Start()
     {
         clientObject = GameObject.Find("SocketIOClient");
+        playerObject = GameObject.Find("PlayerInfo");
 
         if (client == null)
         {
@@ -55,6 +58,8 @@ public class GetCharacters : MonoBehaviour
     private async void ChooseCharacter(int id)
     {
         await client.EmitAsync("characterSelection", id);
+        playerObject.GetComponent<PlayerInfo>().characterID = id;
+        SceneManager.LoadScene("MainApp");
     }
 
     private void IntializeClient()
