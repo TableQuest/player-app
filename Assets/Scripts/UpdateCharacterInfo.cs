@@ -84,8 +84,8 @@ public class UpdateCharacterInfo : MonoBehaviour
     {
         playerObject = GameObject.Find("PlayerInfo");
         int characterID = playerObject.GetComponent<PlayerInfo>().characterID;
-
-        HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:3000/characters/" + characterID);
+        Debug.Log(initClient.requestURI);
+        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(initClient.requestURI+ "/characters/" + characterID);
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         StreamReader reader = new StreamReader(response.GetResponseStream());
 

@@ -14,6 +14,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/CharacterSelection.unity
     guid: 4ba316c1801674399b0c26f0d3fb9339
+  - enabled: 1
+    path: Assets/Scenes/MainApp.unity
+    guid: 8dfe0a280b29f4ab9a3dc77b5aff609f
   m_configObjects:
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: c9407bc4f2f0c4f95b28150940f9aa01, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: d5da9bcb22ed243e9a59bb423b723bdd, type: 2}

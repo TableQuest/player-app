@@ -14,10 +14,15 @@ public class InitialisationClient : MonoBehaviour
     private readonly ConcurrentQueue<Action> _mainThreadhActions = new ConcurrentQueue<Action>();
     public SocketIO client;
 
+    public string requestURI;
+
     public string clientId;
     // Start is called before the first frame update
     private IEnumerator Start()
     {
+
+
+
         DontDestroyOnLoad(gameObject);
         // Create a new thread in order to run the InitSocketThread method
         var thread = new Thread(InitSocketThread);
@@ -43,15 +48,23 @@ public class InitialisationClient : MonoBehaviour
 
     async void InitSocketThread()
     {
+        if (requestURI == null || requestURI == "")
+        {
+            requestURI = "http://localhost:3000";
+        }
+
         if (client == null)
         {
-            client = new SocketIO("http://localhost:3000/");
+            Debug.Log("requestURI");
+            Debug.Log(requestURI);
+            client = new SocketIO(requestURI);
             await client.ConnectAsync();
             if (clientId != null)
             {
                 var json = IdToJson(clientId);
                 await client.EmitAsync("playerConnection", json);
             }
+
         }
     }
 
