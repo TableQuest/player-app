@@ -31,7 +31,7 @@ public class GetCharacters : MonoBehaviour
             IntializeClient();
         }
 
-        HttpWebRequest request = (HttpWebRequest) WebRequest.Create("http://localhost:3000/characters");
+        HttpWebRequest request = (HttpWebRequest) WebRequest.Create(initClient.requestURI+"/characters");
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         StreamReader reader = new StreamReader(response.GetResponseStream());
         string jsonResponse = reader.ReadToEnd();
