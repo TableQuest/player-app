@@ -15,106 +15,83 @@ using TMPro;
 public class UpdateCharacterInfo : MonoBehaviour
 {
 
-    InitialisationClient initClient;
+    private InitialisationClient _initClient;
     /*[SerializeField]*/
-    GameObject clientObject;
-    SocketIO client;
-    GameObject playerObject;
+    private GameObject _clientObject;
+    private SocketIO _client;
+    private GameObject _playerObject;
 
-    PlayerUIInfo ui = new PlayerUIInfo();
-
-    private readonly ConcurrentQueue<Action> _mainThreadhActions = new ConcurrentQueue<Action>();
-
+    private readonly PlayerUIInfo _ui = new();
+    
     private void Start()
     {
-        clientObject = GameObject.Find("SocketIOClient");
-        initClient = clientObject.GetComponent<InitialisationClient>();
+        _clientObject = GameObject.Find("SocketIOClient");
+        _initClient = _clientObject.GetComponent<InitialisationClient>();
         InitPlayer();
 
         // Create a new thread in order to run the InitSocketThread method
         var thread = new Thread(SocketThread);
         // start the thread
         thread.Start();
-
-        StartCoroutine(myUpdate());
     }
 
-    private IEnumerator myUpdate()
+    private void SocketThread()
     {
-        while(true)
-        {
-            // Wait until a callback action is added to the queue
-            yield return new WaitUntil(() => _mainThreadhActions.Count > 0);
-            // If this fails something is wrong ^^
-            // simply get the first added callback
-            if (!_mainThreadhActions.TryDequeue(out var action))
-            {
-                Debug.LogError("Something Went Wrong ! ", this);
-                yield break;
-            }
-
-            // Execute the code of the added callback
-            action?.Invoke();
-        }
-    }
-
-    void SocketThread()
-    {
-        while (client == null)
+        while (_client == null)
         {
 
             Debug.Log("Client null");
-            initialisationClient();
+            InitialisationClient();
             Thread.Sleep(500);
         }
 
-        client.On("updateLifePlayer", (data) =>
+        _client.On("updateLifePlayer", (data) =>
         {
-            string str = data.GetValue<string>(0);
+            var str = data.GetValue<string>(0);
             // Simply wrap your main thread code by wrapping it in a lambda expression
             // which is enqueued to the thread-safe queue
-            _mainThreadhActions.Enqueue(() =>
+            _initClient.MainThreadhActions.Enqueue(() =>
             {
-                ui.life.text = str;
+                _ui.Life.text = str;
             });
         });
     }
 
     private void InitPlayer()
     {
-        playerObject = GameObject.Find("PlayerInfo");
-        int characterID = playerObject.GetComponent<PlayerInfo>().characterID;
-        Debug.Log(initClient.requestURI);
-        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(initClient.requestURI+ "/characters/" + characterID);
-        HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-        StreamReader reader = new StreamReader(response.GetResponseStream());
+        _playerObject = GameObject.Find("PlayerInfo");
+        var characterID = _playerObject.GetComponent<PlayerInfo>().characterID;
+        
+        var request = (HttpWebRequest)WebRequest.Create(_initClient.requestUri+ "/characters/" + characterID);
+        var response = (HttpWebResponse)request.GetResponse();
+        var reader = new StreamReader(response.GetResponseStream());
 
-        string jsonResponse = reader.ReadToEnd();
-        Character character = JsonUtility.FromJson<Character>(jsonResponse);
+        var jsonResponse = reader.ReadToEnd();
+        var character = JsonUtility.FromJson<Character>(jsonResponse);
 
-        ui.name = GameObject.Find("Name").GetComponent<TextMeshProUGUI>();
-        ui.life = GameObject.Find("Life").GetComponent<TextMeshProUGUI>();
-        ui.lifeMax = GameObject.Find("LifeMax").GetComponent<TextMeshProUGUI>();
-        ui.description = GameObject.Find("Description").GetComponent<TextMeshProUGUI>();
+        _ui.Name = GameObject.Find("Name").GetComponent<TextMeshProUGUI>();
+        _ui.Life = GameObject.Find("Life").GetComponent<TextMeshProUGUI>();
+        _ui.LifeMax = GameObject.Find("LifeMax").GetComponent<TextMeshProUGUI>();
+        _ui.Description = GameObject.Find("Description").GetComponent<TextMeshProUGUI>();
 
-        ui.name.text = character.name;
-        ui.life.text = character.life.ToString();
-        ui.lifeMax.text = character.life.ToString();
-        ui.description.text = character.description;
+        _ui.Name.text = character.name;
+        _ui.Life.text = character.life.ToString();
+        _ui.LifeMax.text = character.life.ToString();
+        _ui.Description.text = character.description;
     }
 
 
-    private void initialisationClient()
+    private void InitialisationClient()
     {
-        client = initClient.client;
+        _client = _initClient.Client;
     }
 }
 
 
 public class PlayerUIInfo
 {
-    public TextMeshProUGUI name;
-    public TextMeshProUGUI life;
-    public TextMeshProUGUI lifeMax;
-    public TextMeshProUGUI description;
+    public TextMeshProUGUI Name;
+    public TextMeshProUGUI Life;
+    public TextMeshProUGUI LifeMax;
+    public TextMeshProUGUI Description;
 }
