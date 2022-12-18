@@ -7,7 +7,7 @@
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
-      "hash": "47d10f6115a35c16cf77e3b30b031b4911c330bc"
+      "hash": "112421b6b102d8580513d09cbf2396b524c2d224"
     },
     "com.unity.2d.animation": {
       "version": "7.0.9",
@@ -134,7 +134,7 @@
       }
     },
     "com.unity.ide.rider": {
-      "version": "3.0.16",
+      "version": "3.0.17",
       "depth": 0,
       "source": "registry",
       "dependencies": {

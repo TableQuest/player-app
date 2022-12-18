@@ -53,9 +53,8 @@ public class UpdateCharacterInfo : MonoBehaviour
             // which is enqueued to the thread-safe queue
             _initClient.MainThreadhActions.Enqueue(() =>
             {
-                Debug.Log("Data : "+data.ToString());
-                Debug.Log("string : "+ data.GetValue<UpdateInfoBody>(0).ToString());
-                var updateInfo = JsonUtility.FromJson<UpdateInfoBody>(data.GetValue<string>(0));
+                System.Text.Json.JsonElement json = data.GetValue(0);
+                var updateInfo = JsonUtility.FromJson<UpdateInfoBody>(json.ToString());
                 
                 // System.Text.Json.JsonElement playerJson = data.GetValue(0);
                 // PlayerInfo playerInfo = JsonUtility.FromJson<PlayerInfo>(playerJson.ToString());
