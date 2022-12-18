@@ -39,20 +39,40 @@ public class UpdateCharacterInfo : MonoBehaviour
     {
         while (_client == null)
         {
-
             Debug.Log("Client null");
             InitialisationClient();
             Thread.Sleep(500);
         }
-
-        _client.On("updateLifePlayer", (data) =>
+        Debug.Log("client : "+_client.Id);
+        Debug.Log("Client updated !");
+        _client.On("updateInfoCharacter", (data) =>
         {
-            var str = data.GetValue<string>(0);
+            Debug.Log("Receive Message from the server ! ");
+            
             // Simply wrap your main thread code by wrapping it in a lambda expression
             // which is enqueued to the thread-safe queue
             _initClient.MainThreadhActions.Enqueue(() =>
             {
-                _ui.Life.text = str;
+                Debug.Log("Data : "+data.ToString());
+                Debug.Log("string : "+ data.GetValue<UpdateInfoBody>(0).ToString());
+                var updateInfo = JsonUtility.FromJson<UpdateInfoBody>(data.GetValue<string>(0));
+                
+                // System.Text.Json.JsonElement playerJson = data.GetValue(0);
+                // PlayerInfo playerInfo = JsonUtility.FromJson<PlayerInfo>(playerJson.ToString());
+                switch (updateInfo.variable)
+                {
+                    case "life":
+                        Debug.Log("Updating Life");
+                        _ui.Life.text = updateInfo.value;
+                        break;
+                    case "mana":
+                        Debug.Log("Updating Mana");
+                        _ui.Mana.text = updateInfo.value;
+                        break;
+                    default:
+                        Debug.Log($"Unknown variable : {updateInfo.variable}");
+                        break;
+                }
             });
         });
     }
@@ -72,11 +92,15 @@ public class UpdateCharacterInfo : MonoBehaviour
         _ui.Name = GameObject.Find("Name").GetComponent<TextMeshProUGUI>();
         _ui.Life = GameObject.Find("Life").GetComponent<TextMeshProUGUI>();
         _ui.LifeMax = GameObject.Find("LifeMax").GetComponent<TextMeshProUGUI>();
+        _ui.Mana = GameObject.Find("Mana").GetComponent<TextMeshProUGUI>();
+        _ui.ManaMax = GameObject.Find("ManaMax").GetComponent<TextMeshProUGUI>();
         _ui.Description = GameObject.Find("Description").GetComponent<TextMeshProUGUI>();
-
+        
         _ui.Name.text = character.name;
         _ui.Life.text = character.life.ToString();
-        _ui.LifeMax.text = character.life.ToString();
+        _ui.LifeMax.text = character.lifeMax.ToString();
+        _ui.Mana.text = character.mana.ToString();
+        _ui.ManaMax.text = character.manaMax.ToString();
         _ui.Description.text = character.description;
     }
 
@@ -87,11 +111,18 @@ public class UpdateCharacterInfo : MonoBehaviour
     }
 }
 
+public class UpdateInfoBody
+{
+    public string variable;
+    public string value;
+}
 
 public class PlayerUIInfo
 {
     public TextMeshProUGUI Name;
     public TextMeshProUGUI Life;
     public TextMeshProUGUI LifeMax;
+    public TextMeshProUGUI Mana;
+    public TextMeshProUGUI ManaMax;
     public TextMeshProUGUI Description;
 }

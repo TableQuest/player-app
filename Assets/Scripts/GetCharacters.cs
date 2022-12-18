@@ -75,11 +75,29 @@ public class RootCharacter
 }
 
 [System.Serializable]
+public class Skill
+{
+    public int id;
+    public string name;
+    public int manaCost;
+    public int range;
+    public int maxTarget;
+    public string type;
+    public int statModifier;
+    public bool healing;
+    public string image;
+}
+
+[System.Serializable]
 public class Character
 {
     public int id;
     public string name;
     public int lifeMax;
     public int life;
+    public int manaMax;
+    public int mana;
+    public int speed;
     public string description;
+    public Skill[] skills;
 }
