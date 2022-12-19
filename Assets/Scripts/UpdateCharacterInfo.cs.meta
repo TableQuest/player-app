@@ -3,7 +3,8 @@ guid: efd0d968be57c43089bba1266699374c
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - skillPanelPrefab: {fileID: 8597276782662872913, guid: ec7f75c645fa6a048b7c4a40d277db4d, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
