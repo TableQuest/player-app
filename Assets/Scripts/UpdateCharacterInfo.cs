@@ -22,7 +22,10 @@ public class UpdateCharacterInfo : MonoBehaviour
     private GameObject _playerObject;
 
     private readonly PlayerUIInfo _ui = new();
-    
+
+    [SerializeField]
+    GameObject skillPanelPrefab;
+
     private void Start()
     {
         _clientObject = GameObject.Find("SocketIOClient");
@@ -88,21 +91,73 @@ public class UpdateCharacterInfo : MonoBehaviour
         var jsonResponse = reader.ReadToEnd();
         var character = JsonUtility.FromJson<Character>(jsonResponse);
 
-        _ui.Name = GameObject.Find("Name").GetComponent<TextMeshProUGUI>();
-        _ui.Life = GameObject.Find("Life").GetComponent<TextMeshProUGUI>();
-        _ui.LifeMax = GameObject.Find("LifeMax").GetComponent<TextMeshProUGUI>();
-        _ui.Mana = GameObject.Find("Mana").GetComponent<TextMeshProUGUI>();
-        _ui.ManaMax = GameObject.Find("ManaMax").GetComponent<TextMeshProUGUI>();
-        _ui.Description = GameObject.Find("Description").GetComponent<TextMeshProUGUI>();
-        
+        Sprite sprite = Resources.Load<Sprite>("Images/Dwarf");
+        if (character.name == "Elf")
+        {
+            sprite = Resources.Load<Sprite>("Images/Elf");
+
+        }
+        if (character.name == "Dwarf")
+        {
+            sprite = Resources.Load<Sprite>("Images/Dwarf");
+        }
+        _ui.image = gameObject.transform.Find("GlobalPanel").Find("Image").GetComponent<Image>();
+        _ui.image.sprite = sprite;
+
+        // Basic Info Panel
+        Transform basicInfoPanel = gameObject.transform.Find("GlobalPanel").Find("BasicInfoPanel");
+
+        _ui.Name = basicInfoPanel.Find("Name").GetComponent<TextMeshProUGUI>();
+        _ui.Life = basicInfoPanel.Find("Life").GetComponent<TextMeshProUGUI>();
+        _ui.LifeMax = basicInfoPanel.Find("LifeMax").GetComponent<TextMeshProUGUI>();
+        _ui.Mana = basicInfoPanel.Find("Mana").GetComponent<TextMeshProUGUI>();
+        _ui.ManaMax = basicInfoPanel.Find("ManaMax").GetComponent<TextMeshProUGUI>();
+        _ui.Description = basicInfoPanel.Find("Description").GetComponent<TextMeshProUGUI>();
+
+
         _ui.Name.text = character.name;
         _ui.Life.text = character.life.ToString();
         _ui.LifeMax.text = character.lifeMax.ToString();
         _ui.Mana.text = character.mana.ToString();
         _ui.ManaMax.text = character.manaMax.ToString();
         _ui.Description.text = character.description;
+
+        // Skills Panel
+        Transform SkillsPanel = gameObject.transform.Find("GlobalPanel").Find("SkillsPanel");
+
+        foreach (Skill s in character.skills)
+        {
+            GameObject skillPanel = Instantiate(skillPanelPrefab);
+
+            skillPanel.transform.SetParent(SkillsPanel.Find("ScrollView").Find("Viewport").Find("Content"));
+            setSkillPanel(s, skillPanel.transform);
+        }
     }
 
+    private void setSkillPanel(Skill skill, Transform skillPanel)
+    {
+        // Image 
+        Sprite sprite = Resources.Load<Sprite>(skill.image);
+        skillPanel.Find("Image").GetComponent<Image>().sprite = sprite;
+
+        // Name
+        skillPanel.Find("Name").GetComponent<TextMeshProUGUI>().text = skill.name;
+
+        // Mana
+        TextMeshProUGUI inputFieldMana = skillPanel.Find("ManaCost").GetComponent<TextMeshProUGUI>();
+        inputFieldMana.text = skill.manaCost.ToString();
+
+        // Range
+        TextMeshProUGUI inputFieldRange = skillPanel.Find("Range").GetComponent<TextMeshProUGUI>();
+        inputFieldRange.text = skill.range.ToString();
+
+        // Damage
+        TextMeshProUGUI inputFieldDamage = skillPanel.Find("Damage").GetComponent<TextMeshProUGUI>();
+        inputFieldDamage.text = skill.statModifier.ToString();
+
+        skillPanel.transform.localScale = new Vector3(1, 1, 1);
+
+    }
 
     private void InitialisationClient()
     {
@@ -124,4 +179,5 @@ public class PlayerUIInfo
     public TextMeshProUGUI Mana;
     public TextMeshProUGUI ManaMax;
     public TextMeshProUGUI Description;
+    public Image image;
 }
