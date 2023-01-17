@@ -84,6 +84,7 @@ public class InitialisationClient : MonoBehaviour
     
     public void SendIdOnClick()
     {
+        Handheld.Vibrate();
         if (!string.IsNullOrEmpty(hostInput.text) && !string.IsNullOrEmpty(idInput.text))
         {
             requestUri = "http://" + hostInput.text + ":3000";
