@@ -1,14 +1,13 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 using SocketIOClient;
 using System.Threading;
 using System.Collections.Concurrent;
+using System.Net;
+using System.IO;
 using System;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 public class InitialisationClient : MonoBehaviour
 {
@@ -20,6 +19,9 @@ public class InitialisationClient : MonoBehaviour
     
     public TMP_InputField idInput;
     public TMP_InputField hostInput;
+
+    public bool isNewCharacter = true;
+    public CharacterInfo reloadedCharacterInfo = new CharacterInfo();
     
     // Start is called before the first frame update
     private void Start()
@@ -57,14 +59,59 @@ public class InitialisationClient : MonoBehaviour
             
             Client = new SocketIO(requestUri);
             await Client.ConnectAsync();
-            
+
             var json = IdToJson(idInput.text);
             await Client.EmitAsync("playerConnection", json);
+
+            Debug.Log("Sending " + requestUri+"/players/"+idInput.text+"/characterInfo");
+            var requestCheckIfCharExist = (HttpWebRequest) WebRequest.Create(requestUri+"/players/"+idInput.text+"/characterInfo");
+            var response = (HttpWebResponse)requestCheckIfCharExist.GetResponse();
+            int responseCode = (int)response.StatusCode;
+
+            Debug.Log("Received code: " + responseCode);
+
             MainThreadhActions.Enqueue(() =>
             {
-                SceneManager.LoadScene("CharacterSelection");
+                if (responseCode == 204) {
+                    isNewCharacter = true;
+                    SceneManager.LoadScene("CharacterSelection");
+                }
+                else {
+                    Debug.Log("Reading Character information.");
+
+                    
+                    var reader = new StreamReader(response.GetResponseStream());
+                    var jsonResponse = reader.ReadToEnd();
+                    reloadedCharacterInfo = JsonUtility.FromJson<CharacterInfo>(jsonResponse);
+                    isNewCharacter = false;
+
+                    GameObject _playerObject = GameObject.Find("PlayerInfo");
+                    _playerObject.GetComponent<PlayerInfo>().characterID = reloadedCharacterInfo.id;
+
+                    Debug.Log("Loading MainApp");
+
+                    SceneManager.LoadScene("MainApp");
+                }
             });
+
         }
+    }
+
+    public void closeApp()
+    {
+        Debug.Log("Closing application.");
+        //thanks to http://answers.unity.com/answers/1157271/view.html
+        #if UNITY_EDITOR
+            // Application.Quit() does not work in the editor so
+            // UnityEditor.EditorApplication.isPlaying need to be set to false to end the game
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            Application.Quit();
+        #endif
+    }
+
+    async void OnApplicationQuit() {
+        await Client.DisconnectAsync();
     }
     
     private static string IdToJson(string id)
@@ -99,4 +146,10 @@ class IdInfo
 {
     public string pawnCode;
     public string menuCode;
+}
+
+public class CharacterInfo {
+    public int id;
+    public int life;
+    public int mana;
 }

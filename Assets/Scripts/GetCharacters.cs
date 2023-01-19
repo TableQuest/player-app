@@ -96,7 +96,7 @@ public class Character
     public int life;
     public int manaMax;
     public int mana;
-    public int speed;
     public string description;
+    public int speed;
     public Skill[] skills;
 }

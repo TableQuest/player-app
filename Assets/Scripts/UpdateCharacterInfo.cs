@@ -10,7 +10,6 @@ using System;
 using UnityEngine.SceneManagement;
 using System.Net;
 using System.IO;
-using TMPro;
 
 public class UpdateCharacterInfo : MonoBehaviour
 {
@@ -21,7 +20,7 @@ public class UpdateCharacterInfo : MonoBehaviour
     private SocketIO _client;
     private GameObject _playerObject;
 
-    private readonly PlayerUIInfo _ui = new();
+    public readonly PlayerUIInfo _ui = new();
 
     [SerializeField]
     GameObject skillPanelPrefab;
@@ -97,10 +96,7 @@ public class UpdateCharacterInfo : MonoBehaviour
             sprite = Resources.Load<Sprite>("Images/Elf");
 
         }
-        if (character.name == "Dwarf")
-        {
-            sprite = Resources.Load<Sprite>("Images/Dwarf");
-        }
+        
         _ui.image = gameObject.transform.Find("GlobalPanel").Find("Image").GetComponent<Image>();
         _ui.image.sprite = sprite;
 
@@ -114,11 +110,10 @@ public class UpdateCharacterInfo : MonoBehaviour
         _ui.ManaMax = basicInfoPanel.Find("ManaMax").GetComponent<TextMeshProUGUI>();
         _ui.Description = basicInfoPanel.Find("Description").GetComponent<TextMeshProUGUI>();
 
-
         _ui.Name.text = character.name;
-        _ui.Life.text = character.life.ToString();
+        _ui.Life.text = (!_initClient.isNewCharacter ? _initClient.reloadedCharacterInfo.life.ToString() : character.life.ToString());
         _ui.LifeMax.text = character.lifeMax.ToString();
-        _ui.Mana.text = character.mana.ToString();
+        _ui.Mana.text = (!_initClient.isNewCharacter ? _initClient.reloadedCharacterInfo.mana.ToString() : character.mana.ToString());
         _ui.ManaMax.text = character.manaMax.ToString();
         _ui.Description.text = character.description;
 
