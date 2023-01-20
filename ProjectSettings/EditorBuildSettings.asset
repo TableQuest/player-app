@@ -9,29 +9,26 @@ EditorBuildSettings:
     path: 
     guid: 00000000000000000000000000000000
   - enabled: 0
-    path: Assets/Scenes/InitGame.unity
-    guid: 2ae3a404c14688d439f2d505027a990e
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 0
-    path: Assets/Scenes/Main.unity
-    guid: 727af943c7cf86948a3a2dcc626b009f
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 0
-    path: Assets/Scenes/ConnectionServer.unity
-    guid: c24b9f05840a344d6b217a3740b13f1c
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 0
-    path: Assets/Scenes/Dices.unity
-    guid: 60d1e0e779017144abb6f6d98753be5e
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 0
-    path: Assets/Scenes/Logs.unity
-    guid: 32d4ffeb5f484dd4d86dd23a270406ad
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 0
-    path: Assets/Scenes/NPC.unity
-    guid: de45ae1b0963b0b40a6aa604df2a8d98
-  - enabled: 0
-    path: Assets/Scenes/Player.unity
-    guid: 5ee565ac39a41844d9467bd508e08d63
-  - enabled: 0
-    path: Assets/Scenes/Scene.unity
-    guid: 7367f815a6a2a1d459d6199f6fc0ba4c
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 1
+    path: Assets/Scenes/ScanQrCode.unity
+    guid: 7e44db16b28678d4d98d38299ec5f8aa
   - enabled: 1
     path: Assets/Scenes/Connection.unity
     guid: 3fc8acdd13e6c734bafef6554d6fdbcd
@@ -42,4 +39,5 @@ EditorBuildSettings:
     path: Assets/Scenes/MainApp.unity
     guid: 8dfe0a280b29f4ab9a3dc77b5aff609f
   m_configObjects:
+    com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: db68cfe93cb74b44cb4cb06a366d9b92, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 2c168efa94d664601ab497c0511d36a4, type: 2}

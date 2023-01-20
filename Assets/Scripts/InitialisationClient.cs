@@ -17,8 +17,7 @@ public class InitialisationClient : MonoBehaviour
 
     public string requestUri;
     
-    public TMP_InputField idInput;
-    public TMP_InputField hostInput;
+    public string playerId;
 
     public bool isNewCharacter = true;
     public CharacterInfo reloadedCharacterInfo = new CharacterInfo();
@@ -60,11 +59,11 @@ public class InitialisationClient : MonoBehaviour
             Client = new SocketIO(requestUri);
             await Client.ConnectAsync();
 
-            var json = IdToJson(idInput.text);
+            var json = IdToJson(playerId);
             await Client.EmitAsync("playerConnection", json);
 
-            Debug.Log("Sending " + requestUri+"/players/"+idInput.text+"/characterInfo");
-            var requestCheckIfCharExist = (HttpWebRequest) WebRequest.Create(requestUri+"/players/"+idInput.text+"/characterInfo");
+            Debug.Log("Sending " + requestUri+"/players/"+playerId+"/characterInfo");
+            var requestCheckIfCharExist = (HttpWebRequest) WebRequest.Create(requestUri+"/players/"+playerId+"/characterInfo");
             var response = (HttpWebResponse)requestCheckIfCharExist.GetResponse();
             int responseCode = (int)response.StatusCode;
 
@@ -129,12 +128,15 @@ public class InitialisationClient : MonoBehaviour
         return json;
     }
     
-    public void SendIdOnClick()
+    public void SendIdOnClick(string scannedtext)
     {
+        string scannedUri = scannedtext.Split(" ")[0];
+        string scannedId = scannedtext.Split(" ")[1];
         Handheld.Vibrate();
-        if (!string.IsNullOrEmpty(hostInput.text) && !string.IsNullOrEmpty(idInput.text))
+        if (!string.IsNullOrEmpty(scannedId) && !string.IsNullOrEmpty(scannedUri))
         {
-            requestUri = "http://" + hostInput.text + ":3000";
+            requestUri = scannedUri;
+            playerId = scannedId;
             var thread = new Thread(InitSocketThread);
             // start the thread
             thread.Start();
