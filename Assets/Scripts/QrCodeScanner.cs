@@ -4,6 +4,7 @@ using UnityEngine;
 using ZXing;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class QrCodeScanner : MonoBehaviour
 {
@@ -46,7 +47,6 @@ public class QrCodeScanner : MonoBehaviour
 
         for (int i = 0; i < _devices.Length; i++)
         {
-            Debug.Log("Device "+ i + ": " + _devices[i].name);
             if (!_devices[i].isFrontFacing)
             {
                 _cameraTexture = new WebCamTexture(_devices[i].name, (int)_scanZone.rect.width, (int)_scanZone.rect.height);
@@ -99,5 +99,10 @@ public class QrCodeScanner : MonoBehaviour
         {
         _initClient.SendIdOnClick(_buttonText.text);
         }
+    }
+
+    public void OnClickSwitchToDev()
+    {
+        SceneManager.LoadScene("Connection");
     }
 }
