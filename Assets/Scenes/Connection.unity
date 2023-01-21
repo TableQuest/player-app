@@ -1329,7 +1329,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2091183422}
         m_TargetAssemblyTypeName: InitialisationClient, Assembly-CSharp
-        m_MethodName: SendIdOnClick
+        m_MethodName: ManuallySendIdOnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

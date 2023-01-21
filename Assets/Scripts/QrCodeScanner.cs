@@ -42,6 +42,7 @@ public class QrCodeScanner : MonoBehaviour
         if (_devices.Length == 0)
         {
             _isCamAvailable = false;
+            OnClickSwitchToDev();
             return;
         }
 
@@ -53,6 +54,11 @@ public class QrCodeScanner : MonoBehaviour
             }
         }
 
+        if (_cameraTexture == null) 
+        {
+            OnClickSwitchToDev();
+            return;
+        }
         _cameraTexture.Play();
         _rawImageBackground.texture = _cameraTexture;
         _isCamAvailable = true;
@@ -97,12 +103,13 @@ public class QrCodeScanner : MonoBehaviour
     {
         if(_buttonText.text != "Error" && !(string.IsNullOrEmpty(_buttonText.text)))
         {
-        _initClient.SendIdOnClick(_buttonText.text);
+            _initClient.SendIdOnClick(_buttonText.text);
         }
     }
 
     public void OnClickSwitchToDev()
     {
+        Destroy(GameObject.Find("SocketIOClient"));
         SceneManager.LoadScene("Connection");
     }
 }

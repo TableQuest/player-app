@@ -16,6 +16,9 @@ public class InitialisationClient : MonoBehaviour
     public SocketIO Client;
 
     public string requestUri;
+
+    public TMP_InputField idInput;
+    public TMP_InputField hostInput;
     
     public string playerId;
 
@@ -137,9 +140,19 @@ public class InitialisationClient : MonoBehaviour
         {
             requestUri = scannedUri;
             playerId = scannedId;
+            Debug.Log("URI: " + requestUri + ", PlayerID: " + playerId);
             var thread = new Thread(InitSocketThread);
             // start the thread
             thread.Start();
+        }
+    }
+
+    public void ManuallySendIdOnClick()
+    {
+        Handheld.Vibrate();
+        if (!string.IsNullOrEmpty(hostInput.text) && !string.IsNullOrEmpty(idInput.text))
+        {
+            SendIdOnClick("http://" + hostInput.text + ":3000 "+idInput.text);
         }
     }
 }
