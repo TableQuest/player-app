@@ -30,6 +30,7 @@ public class GetCharacters : MonoBehaviour
             InitializeClient();
         }
 
+        Debug.Log(_initClient.requestUri+"/characters");
         var request = (HttpWebRequest) WebRequest.Create(_initClient.requestUri+"/characters");
         var response = (HttpWebResponse)request.GetResponse();
         var reader = new StreamReader(response.GetResponseStream());

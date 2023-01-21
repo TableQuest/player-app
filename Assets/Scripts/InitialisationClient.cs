@@ -16,9 +16,11 @@ public class InitialisationClient : MonoBehaviour
     public SocketIO Client;
 
     public string requestUri;
-    
+
     public TMP_InputField idInput;
     public TMP_InputField hostInput;
+    
+    public string playerId;
 
     public bool isNewCharacter = true;
     public CharacterInfo reloadedCharacterInfo = new CharacterInfo();
@@ -60,11 +62,11 @@ public class InitialisationClient : MonoBehaviour
             Client = new SocketIO(requestUri);
             await Client.ConnectAsync();
 
-            var json = IdToJson(idInput.text);
+            var json = IdToJson(playerId);
             await Client.EmitAsync("playerConnection", json);
 
-            Debug.Log("Sending " + requestUri+"/players/"+idInput.text+"/characterInfo");
-            var requestCheckIfCharExist = (HttpWebRequest) WebRequest.Create(requestUri+"/players/"+idInput.text+"/characterInfo");
+            Debug.Log("Sending " + requestUri+"/players/"+playerId+"/characterInfo");
+            var requestCheckIfCharExist = (HttpWebRequest) WebRequest.Create(requestUri+"/players/"+playerId+"/characterInfo");
             var response = (HttpWebResponse)requestCheckIfCharExist.GetResponse();
             int responseCode = (int)response.StatusCode;
 
@@ -129,15 +131,28 @@ public class InitialisationClient : MonoBehaviour
         return json;
     }
     
-    public void SendIdOnClick()
+    public void SendIdOnClick(string scannedtext)
+    {
+        string scannedUri = scannedtext.Split(" ")[0];
+        string scannedId = scannedtext.Split(" ")[1];
+        Handheld.Vibrate();
+        if (!string.IsNullOrEmpty(scannedId) && !string.IsNullOrEmpty(scannedUri))
+        {
+            requestUri = scannedUri;
+            playerId = scannedId;
+            Debug.Log("URI: " + requestUri + ", PlayerID: " + playerId);
+            var thread = new Thread(InitSocketThread);
+            // start the thread
+            thread.Start();
+        }
+    }
+
+    public void ManuallySendIdOnClick()
     {
         Handheld.Vibrate();
         if (!string.IsNullOrEmpty(hostInput.text) && !string.IsNullOrEmpty(idInput.text))
         {
-            requestUri = "http://" + hostInput.text + ":3000";
-            var thread = new Thread(InitSocketThread);
-            // start the thread
-            thread.Start();
+            SendIdOnClick("http://" + hostInput.text + ":3000 "+idInput.text);
         }
     }
 }
