@@ -86,7 +86,7 @@ public class QrCodeScanner : MonoBehaviour
             Result result = barcodeReader.Decode(_cameraTexture.GetPixels32(), _cameraTexture.width, _cameraTexture.height);
             if(result != null)
             {
-                _buttonText.text = result.Text;
+                _buttonText.text = result.Text.Split(" ")[1];
             }
             else 
             {
