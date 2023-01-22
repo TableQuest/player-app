@@ -90,11 +90,6 @@ public class QrCodeScanner : MonoBehaviour
                 _qrCodeText = result.Text;
                 _buttonText.text = result.Text.Split(" ")[1];
             }
-            else 
-            {
-                _qrCodeText = "";
-                _buttonText.text = "";
-            }
         }
         catch (System.Exception)
         {
