@@ -25,6 +25,9 @@ public class UpdateCharacterInfo : MonoBehaviour
     [SerializeField]
     GameObject skillPanelPrefab;
 
+    [SerializeField]
+    GameObject logPanelPrefab;
+
     private void Start()
     {
         _clientObject = GameObject.Find("SocketIOClient");
@@ -74,6 +77,23 @@ public class UpdateCharacterInfo : MonoBehaviour
                         Debug.Log($"Unknown variable : {updateInfo.variable}");
                         break;
                 }
+            });
+        });
+
+        _client.On("log", (data) =>
+        {
+            _initClient.MainThreadhActions.Enqueue(() =>
+            {
+                LogInfo logInfo = JsonUtility.FromJson<LogInfo>(data.GetValue(0).ToString());
+                Debug.Log("Logging " + logInfo.logText);
+
+                GameObject logPanel = Instantiate(logPanelPrefab);
+                Transform logScrollView = gameObject.transform.Find("GlobalPanel").Find("LogsPanel").Find("ScrollView");
+                logPanel.transform.SetParent(logScrollView.Find("Viewport").Find("Content"));
+
+                fillLogPanel(logInfo, logPanel.transform);
+                
+                logScrollView.GetComponent<ScrollRect>().verticalNormalizedPosition = 0;
             });
         });
     }
@@ -151,7 +171,21 @@ public class UpdateCharacterInfo : MonoBehaviour
         inputFieldDamage.text = skill.statModifier.ToString();
 
         skillPanel.transform.localScale = new Vector3(1, 1, 1);
+    }
 
+    private void fillLogPanel(LogInfo log, Transform logPanelTransform)
+    {
+        // Image 
+        Sprite sprite = Resources.Load<Sprite>(log.imagePath);
+        logPanelTransform.Find("HeaderGroup").Find("Image").GetComponent<Image>().sprite = sprite;
+
+        //Title
+        logPanelTransform.Find("HeaderGroup").Find("NameText").GetComponent<TextMeshProUGUI>().text = log.title;
+
+        //Content
+        logPanelTransform.Find("LogText").GetComponent<TextMeshProUGUI>().text = log.logText;
+
+        logPanelTransform.transform.localScale = Vector3.one;
     }
 
     private void InitialisationClient()
@@ -175,4 +209,11 @@ public class PlayerUIInfo
     public TextMeshProUGUI ManaMax;
     public TextMeshProUGUI Description;
     public Image image;
+}
+
+public class LogInfo
+{
+    public string imagePath;
+    public string title;
+    public string logText;
 }

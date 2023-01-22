@@ -17,6 +17,7 @@ public class QrCodeScanner : MonoBehaviour
     private RectTransform _scanZone;
     [SerializeField]
     private TextMeshProUGUI _buttonText;
+    private string _qrCodeText;
 
     private bool _isCamAvailable;
     private WebCamTexture _cameraTexture;
@@ -87,10 +88,12 @@ public class QrCodeScanner : MonoBehaviour
             if(result != null)
             {
                 _buttonText.text = result.Text.Split(" ")[1];
+                _qrCodeText = result.Text;
             }
             else 
             {
                 _buttonText.text = "";
+                _qrCodeText = "";
             }
         }
         catch (System.Exception)
@@ -101,9 +104,9 @@ public class QrCodeScanner : MonoBehaviour
 
     public void connectOnClick()
     {
-        if(_buttonText.text != "Error" && !(string.IsNullOrEmpty(_buttonText.text)))
+        if(_qrCodeText != "Error" && !(string.IsNullOrEmpty(_qrCodeText)))
         {
-            _initClient.SendIdOnClick(_buttonText.text);
+            _initClient.SendIdOnClick(_qrCodeText);
         }
     }
 
