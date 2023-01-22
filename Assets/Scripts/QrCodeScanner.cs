@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using ZXing;
 using TMPro;
@@ -89,11 +87,6 @@ public class QrCodeScanner : MonoBehaviour
             {
                 _qrCodeText = result.Text;
                 _buttonText.text = result.Text.Split(" ")[1];
-            }
-            else 
-            {
-                _qrCodeText = "";
-                _buttonText.text = "";
             }
         }
         catch (System.Exception)
