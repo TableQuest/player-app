@@ -6,10 +6,7 @@ using UnityEngine.Networking;
 using TMPro;
 using SocketIOClient;
 using System.Threading;
-using System.Net;
-using System.IO;
 using System;
-using UnityEngine.Networking;
 
 public class UpdateCharacterInfo : MonoBehaviour
 {
@@ -34,14 +31,13 @@ public class UpdateCharacterInfo : MonoBehaviour
     {
         _clientObject = GameObject.Find("SocketIOClient");
         _initClient = _clientObject.GetComponent<InitialisationClient>();
-        StartCoroutine(InitPlayer());
-        StartCoroutine(loadLogsFromServer());
 
         // Create a new thread in order to run the InitSocketThread method
         var thread = new Thread(SocketThread);
         // start the thread
         thread.Start();
         StartCoroutine(InitPlayer());
+        StartCoroutine(loadLogsFromServer());
     }
 
     private void SocketThread()
