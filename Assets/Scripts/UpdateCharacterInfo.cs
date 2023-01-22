@@ -10,6 +10,7 @@ using System;
 using UnityEngine.SceneManagement;
 using System.Net;
 using System.IO;
+using UnityEngine.Networking;
 
 public class UpdateCharacterInfo : MonoBehaviour
 {
@@ -28,16 +29,19 @@ public class UpdateCharacterInfo : MonoBehaviour
     [SerializeField]
     GameObject logPanelPrefab;
 
+    public TextMeshProUGUI helpText;
+
     private void Start()
     {
         _clientObject = GameObject.Find("SocketIOClient");
         _initClient = _clientObject.GetComponent<InitialisationClient>();
-        InitPlayer();
+        
 
         // Create a new thread in order to run the InitSocketThread method
         var thread = new Thread(SocketThread);
         // start the thread
         thread.Start();
+        StartCoroutine(InitPlayer());
     }
 
     private void SocketThread()
@@ -96,56 +100,83 @@ public class UpdateCharacterInfo : MonoBehaviour
                 logScrollView.GetComponent<ScrollRect>().verticalNormalizedPosition = 0;
             });
         });
+        
+        _client.On("helpTurn", (data) =>
+        {
+            // Debug.Log("Receive Help Turn !"+data.GetValue().ToString());
+            _initClient.MainThreadhActions.Enqueue(() =>
+            {
+                var help = JsonUtility.FromJson<HelpTurn>(data.GetValue().ToString());
+                if (help.isTurn)
+                {
+                    Handheld.Vibrate();
+                }
+                helpText.text = help.text;
+            });
+        });
     }
 
-    private void InitPlayer()
+    private IEnumerator InitPlayer()
     {
         _playerObject = GameObject.Find("PlayerInfo");
         var characterID = _playerObject.GetComponent<PlayerInfo>().characterID;
         
-        var request = (HttpWebRequest)WebRequest.Create(_initClient.requestUri+ "/characters/" + characterID);
-        var response = (HttpWebResponse)request.GetResponse();
-        var reader = new StreamReader(response.GetResponseStream());
+        // var request = (HttpWebRequest)WebRequest.Create(_initClient.requestUri+ "/characters/" + characterID);
+        // var response = (HttpWebResponse)request.GetResponse();
+        // var reader = new StreamReader(response.GetResponseStream());
+        //
+        // var jsonResponse = reader.ReadToEnd();
 
-        var jsonResponse = reader.ReadToEnd();
-        var character = JsonUtility.FromJson<Character>(jsonResponse);
+        var www = UnityWebRequest.Get(_initClient.requestUri + "/characters/" + characterID);
 
-        Sprite sprite = Resources.Load<Sprite>("Images/Dwarf");
-        if (character.name == "Elf")
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
         {
-            sprite = Resources.Load<Sprite>("Images/Elf");
-
+            Debug.Log(www.error);
         }
-        
-        _ui.image = gameObject.transform.Find("GlobalPanel").Find("Image").GetComponent<Image>();
-        _ui.image.sprite = sprite;
-
-        // Basic Info Panel
-        Transform basicInfoPanel = gameObject.transform.Find("GlobalPanel").Find("BasicInfoPanel");
-
-        _ui.Name = basicInfoPanel.Find("Name").GetComponent<TextMeshProUGUI>();
-        _ui.Life = basicInfoPanel.Find("Life").GetComponent<TextMeshProUGUI>();
-        _ui.LifeMax = basicInfoPanel.Find("LifeMax").GetComponent<TextMeshProUGUI>();
-        _ui.Mana = basicInfoPanel.Find("Mana").GetComponent<TextMeshProUGUI>();
-        _ui.ManaMax = basicInfoPanel.Find("ManaMax").GetComponent<TextMeshProUGUI>();
-        _ui.Description = basicInfoPanel.Find("Description").GetComponent<TextMeshProUGUI>();
-
-        _ui.Name.text = character.name;
-        _ui.Life.text = (!_initClient.isNewCharacter ? _initClient.reloadedCharacterInfo.life.ToString() : character.life.ToString());
-        _ui.LifeMax.text = character.lifeMax.ToString();
-        _ui.Mana.text = (!_initClient.isNewCharacter ? _initClient.reloadedCharacterInfo.mana.ToString() : character.mana.ToString());
-        _ui.ManaMax.text = character.manaMax.ToString();
-        _ui.Description.text = character.description;
-
-        // Skills Panel
-        Transform SkillsPanel = gameObject.transform.Find("GlobalPanel").Find("SkillsPanel");
-
-        foreach (Skill s in character.skills)
+        else
         {
-            GameObject skillPanel = Instantiate(skillPanelPrefab);
+            var jsonResponse = www.downloadHandler.text;
+            var character = JsonUtility.FromJson<Character>(jsonResponse);
 
-            skillPanel.transform.SetParent(SkillsPanel.Find("ScrollView").Find("Viewport").Find("Content"));
-            setSkillPanel(s, skillPanel.transform);
+            Sprite sprite = Resources.Load<Sprite>("Images/Dwarf");
+            if (character.name == "Elf")
+            {
+                sprite = Resources.Load<Sprite>("Images/Elf");
+
+            }
+        
+            _ui.image = gameObject.transform.Find("GlobalPanel").Find("Image").GetComponent<Image>();
+            _ui.image.sprite = sprite;
+
+            // Basic Info Panel
+            Transform basicInfoPanel = gameObject.transform.Find("GlobalPanel").Find("BasicInfoPanel");
+
+            _ui.Name = basicInfoPanel.Find("Name").GetComponent<TextMeshProUGUI>();
+            _ui.Life = basicInfoPanel.Find("Life").GetComponent<TextMeshProUGUI>();
+            _ui.LifeMax = basicInfoPanel.Find("LifeMax").GetComponent<TextMeshProUGUI>();
+            _ui.Mana = basicInfoPanel.Find("Mana").GetComponent<TextMeshProUGUI>();
+            _ui.ManaMax = basicInfoPanel.Find("ManaMax").GetComponent<TextMeshProUGUI>();
+            _ui.Description = basicInfoPanel.Find("Description").GetComponent<TextMeshProUGUI>();
+
+            _ui.Name.text = character.name;
+            _ui.Life.text = (!_initClient.isNewCharacter ? _initClient.reloadedCharacterInfo.life.ToString() : character.life.ToString());
+            _ui.LifeMax.text = character.lifeMax.ToString();
+            _ui.Mana.text = (!_initClient.isNewCharacter ? _initClient.reloadedCharacterInfo.mana.ToString() : character.mana.ToString());
+            _ui.ManaMax.text = character.manaMax.ToString();
+            _ui.Description.text = character.description;
+
+            // Skills Panel
+            Transform SkillsPanel = gameObject.transform.Find("GlobalPanel").Find("SkillsPanel");
+
+            foreach (Skill s in character.skills)
+            {
+                GameObject skillPanel = Instantiate(skillPanelPrefab);
+
+                skillPanel.transform.SetParent(SkillsPanel.Find("ScrollView").Find("Viewport").Find("Content"));
+                setSkillPanel(s, skillPanel.transform);
+            }   
         }
     }
 
@@ -216,4 +247,10 @@ public class LogInfo
     public string imagePath;
     public string title;
     public string logText;
+}
+
+public class HelpTurn
+{
+    public bool isTurn;
+    public string text;
 }

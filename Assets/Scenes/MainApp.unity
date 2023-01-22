@@ -590,6 +590,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillPanelPrefab: {fileID: 8597276782662872913, guid: ec7f75c645fa6a048b7c4a40d277db4d, type: 3}
   logPanelPrefab: {fileID: 8597276782662872913, guid: f798c9578683a471d9ab23172555a52d, type: 3}
+  helpText: {fileID: 1534558938}
 --- !u!1 &284851420
 GameObject:
   m_ObjectHideFlags: 0
@@ -1603,7 +1604,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 355465640}
   m_HandleRect: {fileID: 355465639}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
