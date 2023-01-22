@@ -119,10 +119,10 @@ public class UpdateCharacterInfo : MonoBehaviour
             var jsonResponse = www.downloadHandler.text;
             var character = JsonUtility.FromJson<Character>(jsonResponse);
 
-            Sprite sprite = Resources.Load<Sprite>("Images/dwarf");
+            Sprite sprite = Resources.Load<Sprite>("Images/Dwarf");
             if (character.name == "Elf")
             {
-                sprite = Resources.Load<Sprite>("Images/elf");
+                sprite = Resources.Load<Sprite>("Images/Elf");
 
             }
 
