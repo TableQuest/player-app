@@ -2,14 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 using TMPro;
 using SocketIOClient;
 using System.Threading;
-using System.Collections.Concurrent;
-using System;
-using UnityEngine.SceneManagement;
 using System.Net;
 using System.IO;
+using System;
 
 public class UpdateCharacterInfo : MonoBehaviour
 {
@@ -32,7 +31,8 @@ public class UpdateCharacterInfo : MonoBehaviour
     {
         _clientObject = GameObject.Find("SocketIOClient");
         _initClient = _clientObject.GetComponent<InitialisationClient>();
-        InitPlayer();
+        StartCoroutine(InitPlayer());
+        StartCoroutine(loadLogsFromServer());
 
         // Create a new thread in order to run the InitSocketThread method
         var thread = new Thread(SocketThread);
@@ -44,15 +44,12 @@ public class UpdateCharacterInfo : MonoBehaviour
     {
         while (_client == null)
         {
-            Debug.Log("Client null");
             InitialisationClient();
             Thread.Sleep(500);
         }
-        Debug.Log("client : "+_client.Id);
-        Debug.Log("Client updated !");
         _client.On("updateInfoCharacter", (data) =>
         {
-            Debug.Log("Receive Message from the server ! ");
+            Debug.Log("Receive updateInfoCharacter from the server ! ");
             
             // Simply wrap your main thread code by wrapping it in a lambda expression
             // which is enqueued to the thread-safe queue
@@ -85,67 +82,72 @@ public class UpdateCharacterInfo : MonoBehaviour
             _initClient.MainThreadhActions.Enqueue(() =>
             {
                 LogInfo logInfo = JsonUtility.FromJson<LogInfo>(data.GetValue(0).ToString());
-                Debug.Log("Logging " + logInfo.logText);
-
-                GameObject logPanel = Instantiate(logPanelPrefab);
-                Transform logScrollView = gameObject.transform.Find("GlobalPanel").Find("LogsPanel").Find("ScrollView");
-                logPanel.transform.SetParent(logScrollView.Find("Viewport").Find("Content"));
-
-                fillLogPanel(logInfo, logPanel.transform);
-                
-                logScrollView.GetComponent<ScrollRect>().verticalNormalizedPosition = 0;
+                createLogPanel(logInfo);
             });
         });
     }
 
-    private void InitPlayer()
+    private IEnumerator InitPlayer()
     {
         _playerObject = GameObject.Find("PlayerInfo");
         var characterID = _playerObject.GetComponent<PlayerInfo>().characterID;
         
-        var request = (HttpWebRequest)WebRequest.Create(_initClient.requestUri+ "/characters/" + characterID);
-        var response = (HttpWebResponse)request.GetResponse();
-        var reader = new StreamReader(response.GetResponseStream());
+        // var request = (HttpWebRequest)WebRequest.Create(_initClient.requestUri+ "/characters/" + characterID);
+        // var response = (HttpWebResponse)request.GetResponse();
+        // var reader = new StreamReader(response.GetResponseStream());
 
-        var jsonResponse = reader.ReadToEnd();
-        var character = JsonUtility.FromJson<Character>(jsonResponse);
+        // var jsonResponse = reader.ReadToEnd();
+        // var character = JsonUtility.FromJson<Character>(jsonResponse);
 
-        Sprite sprite = Resources.Load<Sprite>("Images/Dwarf");
-        if (character.name == "Elf")
-        {
-            sprite = Resources.Load<Sprite>("Images/Elf");
+        var www = UnityWebRequest.Get(_initClient.requestUri+ "/characters/" + characterID);
+    
+        yield return www.SendWebRequest();
 
+        if (www.result != UnityWebRequest.Result.Success) {
+            Debug.Log(www.error);
         }
-        
-        _ui.image = gameObject.transform.Find("GlobalPanel").Find("Image").GetComponent<Image>();
-        _ui.image.sprite = sprite;
+        else {
+            // Show results as text
+            var jsonResponse = www.downloadHandler.text;
+            var character = JsonUtility.FromJson<Character>(jsonResponse);
 
-        // Basic Info Panel
-        Transform basicInfoPanel = gameObject.transform.Find("GlobalPanel").Find("BasicInfoPanel");
+            Sprite sprite = Resources.Load<Sprite>("Images/Dwarf");
+            if (character.name == "Elf")
+            {
+                sprite = Resources.Load<Sprite>("Images/Elf");
 
-        _ui.Name = basicInfoPanel.Find("Name").GetComponent<TextMeshProUGUI>();
-        _ui.Life = basicInfoPanel.Find("Life").GetComponent<TextMeshProUGUI>();
-        _ui.LifeMax = basicInfoPanel.Find("LifeMax").GetComponent<TextMeshProUGUI>();
-        _ui.Mana = basicInfoPanel.Find("Mana").GetComponent<TextMeshProUGUI>();
-        _ui.ManaMax = basicInfoPanel.Find("ManaMax").GetComponent<TextMeshProUGUI>();
-        _ui.Description = basicInfoPanel.Find("Description").GetComponent<TextMeshProUGUI>();
+            }
+            
+            _ui.image = gameObject.transform.Find("GlobalPanel").Find("Image").GetComponent<Image>();
+            _ui.image.sprite = sprite;
 
-        _ui.Name.text = character.name;
-        _ui.Life.text = (!_initClient.isNewCharacter ? _initClient.reloadedCharacterInfo.life.ToString() : character.life.ToString());
-        _ui.LifeMax.text = character.lifeMax.ToString();
-        _ui.Mana.text = (!_initClient.isNewCharacter ? _initClient.reloadedCharacterInfo.mana.ToString() : character.mana.ToString());
-        _ui.ManaMax.text = character.manaMax.ToString();
-        _ui.Description.text = character.description;
+            // Basic Info Panel
+            Transform basicInfoPanel = gameObject.transform.Find("GlobalPanel").Find("BasicInfoPanel");
 
-        // Skills Panel
-        Transform SkillsPanel = gameObject.transform.Find("GlobalPanel").Find("SkillsPanel");
+            _ui.Name = basicInfoPanel.Find("Name").GetComponent<TextMeshProUGUI>();
+            _ui.Life = basicInfoPanel.Find("Life").GetComponent<TextMeshProUGUI>();
+            _ui.LifeMax = basicInfoPanel.Find("LifeMax").GetComponent<TextMeshProUGUI>();
+            _ui.Mana = basicInfoPanel.Find("Mana").GetComponent<TextMeshProUGUI>();
+            _ui.ManaMax = basicInfoPanel.Find("ManaMax").GetComponent<TextMeshProUGUI>();
+            _ui.Description = basicInfoPanel.Find("Description").GetComponent<TextMeshProUGUI>();
 
-        foreach (Skill s in character.skills)
-        {
-            GameObject skillPanel = Instantiate(skillPanelPrefab);
+            _ui.Name.text = character.name;
+            _ui.Life.text = (!_initClient.isNewCharacter ? _initClient.reloadedCharacterInfo.life.ToString() : character.life.ToString());
+            _ui.LifeMax.text = character.lifeMax.ToString();
+            _ui.Mana.text = (!_initClient.isNewCharacter ? _initClient.reloadedCharacterInfo.mana.ToString() : character.mana.ToString());
+            _ui.ManaMax.text = character.manaMax.ToString();
+            _ui.Description.text = character.description;
 
-            skillPanel.transform.SetParent(SkillsPanel.Find("ScrollView").Find("Viewport").Find("Content"));
-            setSkillPanel(s, skillPanel.transform);
+            // Skills Panel
+            Transform SkillsPanel = gameObject.transform.Find("GlobalPanel").Find("SkillsPanel");
+
+            foreach (Skill s in character.skills)
+            {
+                GameObject skillPanel = Instantiate(skillPanelPrefab);
+
+                skillPanel.transform.SetParent(SkillsPanel.Find("ScrollView").Find("Viewport").Find("Content"));
+                setSkillPanel(s, skillPanel.transform);
+            }
         }
     }
 
@@ -171,6 +173,41 @@ public class UpdateCharacterInfo : MonoBehaviour
         inputFieldDamage.text = skill.statModifier.ToString();
 
         skillPanel.transform.localScale = new Vector3(1, 1, 1);
+    }
+
+    IEnumerator loadLogsFromServer() {
+        var www = UnityWebRequest.Get(_initClient.requestUri+"/logs");
+    
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success) {
+            Debug.Log(www.error);
+        }
+        else {
+            // Show results as text
+            var jsonResponse = www.downloadHandler.text;
+            var logInfos = JsonUtility.FromJson<LogList>(jsonResponse);
+
+            Debug.Log(jsonResponse);
+            Debug.Log(logInfos.listOfLogs);
+            foreach (LogInfo logInfo in logInfos.listOfLogs)
+            {
+                createLogPanel(logInfo);
+            }
+        }
+    }
+
+    private void createLogPanel(LogInfo logInfo)
+    {
+        Debug.Log("Logging " + logInfo.logText);
+
+        GameObject logPanel = Instantiate(logPanelPrefab);
+        Transform logScrollView = gameObject.transform.Find("GlobalPanel").Find("LogsPanel").Find("ScrollView");
+        logPanel.transform.SetParent(logScrollView.Find("Viewport").Find("Content"));
+
+        fillLogPanel(logInfo, logPanel.transform);
+        
+        logScrollView.GetComponent<ScrollRect>().verticalNormalizedPosition = 0;
     }
 
     private void fillLogPanel(LogInfo log, Transform logPanelTransform)
@@ -211,9 +248,16 @@ public class PlayerUIInfo
     public Image image;
 }
 
+[Serializable]
 public class LogInfo
 {
     public string imagePath;
     public string title;
     public string logText;
+}
+
+[Serializable]
+public class LogList
+{
+    public List<LogInfo> listOfLogs;
 }
