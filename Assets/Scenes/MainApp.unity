@@ -2193,6 +2193,7 @@ GameObject:
   - component: {fileID: 1061952651}
   - component: {fileID: 1061952650}
   - component: {fileID: 1061952649}
+  - component: {fileID: 1061952653}
   m_Layer: 5
   m_Name: TurnInfoPanel
   m_TagString: Untagged
@@ -2299,6 +2300,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1061952647}
   m_CullTransparentMesh: 1
+--- !u!114 &1061952653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1061952647}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &1176559132
 GameObject:
   m_ObjectHideFlags: 0
