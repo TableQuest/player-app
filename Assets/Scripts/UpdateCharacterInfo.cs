@@ -105,12 +105,6 @@ public class UpdateCharacterInfo : MonoBehaviour
     {
         _playerObject = GameObject.Find("PlayerInfo");
         var characterID = _playerObject.GetComponent<PlayerInfo>().characterID;
-        
-        // var request = (HttpWebRequest)WebRequest.Create(_initClient.requestUri+ "/characters/" + characterID);
-        // var response = (HttpWebResponse)request.GetResponse();
-        // var reader = new StreamReader(response.GetResponseStream());
-        //
-        // var jsonResponse = reader.ReadToEnd();
 
         var www = UnityWebRequest.Get(_initClient.requestUri + "/characters/" + characterID);
 
@@ -125,13 +119,13 @@ public class UpdateCharacterInfo : MonoBehaviour
             var jsonResponse = www.downloadHandler.text;
             var character = JsonUtility.FromJson<Character>(jsonResponse);
 
-            Sprite sprite = Resources.Load<Sprite>("Images/Dwarf");
+            Sprite sprite = Resources.Load<Sprite>("Images/dwarf");
             if (character.name == "Elf")
             {
-                sprite = Resources.Load<Sprite>("Images/Elf");
+                sprite = Resources.Load<Sprite>("Images/elf");
 
             }
-        
+
             _ui.image = gameObject.transform.Find("GlobalPanel").Find("Image").GetComponent<Image>();
             _ui.image.sprite = sprite;
 
@@ -213,14 +207,12 @@ public class UpdateCharacterInfo : MonoBehaviour
 
     private void createLogPanel(LogInfo logInfo)
     {
-        Debug.Log("Logging " + logInfo.logText);
 
         GameObject logPanel = Instantiate(logPanelPrefab);
         Transform logScrollView = gameObject.transform.Find("GlobalPanel").Find("LogsPanel").Find("ScrollView");
         logPanel.transform.SetParent(logScrollView.Find("Viewport").Find("Content"));
 
         fillLogPanel(logInfo, logPanel.transform);
-        
         logScrollView.GetComponent<ScrollRect>().verticalNormalizedPosition = 0;
     }
 
