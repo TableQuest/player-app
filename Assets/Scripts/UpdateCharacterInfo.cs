@@ -27,6 +27,8 @@ public class UpdateCharacterInfo : MonoBehaviour
     [SerializeField]
     GameObject logPanelPrefab;
 
+    public TextMeshProUGUI helpText;
+
     private void Start()
     {
         _clientObject = GameObject.Find("SocketIOClient");
@@ -38,6 +40,7 @@ public class UpdateCharacterInfo : MonoBehaviour
         var thread = new Thread(SocketThread);
         // start the thread
         thread.Start();
+        StartCoroutine(InitPlayer());
     }
 
     private void SocketThread()
@@ -85,6 +88,20 @@ public class UpdateCharacterInfo : MonoBehaviour
                 createLogPanel(logInfo);
             });
         });
+        
+        _client.On("helpTurn", (data) =>
+        {
+            // Debug.Log("Receive Help Turn !"+data.GetValue().ToString());
+            _initClient.MainThreadhActions.Enqueue(() =>
+            {
+                var help = JsonUtility.FromJson<HelpTurn>(data.GetValue().ToString());
+                if (help.isTurn)
+                {
+                    Handheld.Vibrate();
+                }
+                helpText.text = help.text;
+            });
+        });
     }
 
     private IEnumerator InitPlayer()
@@ -95,19 +112,19 @@ public class UpdateCharacterInfo : MonoBehaviour
         // var request = (HttpWebRequest)WebRequest.Create(_initClient.requestUri+ "/characters/" + characterID);
         // var response = (HttpWebResponse)request.GetResponse();
         // var reader = new StreamReader(response.GetResponseStream());
-
+        //
         // var jsonResponse = reader.ReadToEnd();
-        // var character = JsonUtility.FromJson<Character>(jsonResponse);
 
-        var www = UnityWebRequest.Get(_initClient.requestUri+ "/characters/" + characterID);
-    
+        var www = UnityWebRequest.Get(_initClient.requestUri + "/characters/" + characterID);
+
         yield return www.SendWebRequest();
 
-        if (www.result != UnityWebRequest.Result.Success) {
+        if (www.result != UnityWebRequest.Result.Success)
+        {
             Debug.Log(www.error);
         }
-        else {
-            // Show results as text
+        else
+        {
             var jsonResponse = www.downloadHandler.text;
             var character = JsonUtility.FromJson<Character>(jsonResponse);
 
@@ -117,7 +134,7 @@ public class UpdateCharacterInfo : MonoBehaviour
                 sprite = Resources.Load<Sprite>("Images/Elf");
 
             }
-            
+        
             _ui.image = gameObject.transform.Find("GlobalPanel").Find("Image").GetComponent<Image>();
             _ui.image.sprite = sprite;
 
@@ -147,7 +164,7 @@ public class UpdateCharacterInfo : MonoBehaviour
 
                 skillPanel.transform.SetParent(SkillsPanel.Find("ScrollView").Find("Viewport").Find("Content"));
                 setSkillPanel(s, skillPanel.transform);
-            }
+            }   
         }
     }
 
@@ -260,4 +277,9 @@ public class LogInfo
 public class LogList
 {
     public List<LogInfo> listOfLogs;
+}
+public class HelpTurn
+{
+    public bool isTurn;
+    public string text;
 }
